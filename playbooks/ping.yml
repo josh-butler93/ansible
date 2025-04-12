@@ -1,0 +1,11 @@
+---
+- name: Connectivity Check
+  hosts: <hosts>
+  gather_facts: true
+  become: true
+  tasks:
+
+    - name: Ping
+      ansible.builtin.ping:
+
+# ansible-playbook ping.yml -i <filename>.ini -k --ask-become-pass
