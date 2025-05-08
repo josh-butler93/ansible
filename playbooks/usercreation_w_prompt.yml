@@ -1,0 +1,49 @@
+---
+- name: Creating New Linux User
+  hosts: all  # Or specify your target hosts
+  gather_facts: yes
+  become: true  # For root privileges
+  vars_prompt:
+    - name: user_name
+      prompt: "Enter the username"
+      private: no  # Set to 'yes' if you want to hide input (for passwords)
+      
+    - name: user_password
+      prompt: "Enter the password"
+      private: yes  # Hide input for password
+      
+    - name: user_comment
+      prompt: "Enter a comment for the user"
+      private: no
+      
+    - name: user_groups
+      prompt: "Enter groups for the user (comma-separated)"
+      private: no
+
+  tasks:
+    - name: Create a new user
+      user:
+        name: "{{ user_name }}"  # The username
+        password: "{{ user_password }}"  # The password (encrypted is best practice)
+        comment: "{{ user_comment }}"  # Optional user description
+        create_home: yes  # Create the home directory
+        home: "/home/{{ user_name }}"  # The home directory
+        shell: "/bin/bash"  # Default shell
+        state: present  # Ensure the user exists
+        groups: "{{ user_groups | split(',') }}"  # Assign secondary groups
+        append: yes  # Append to existing groups
+        update_password: on_create  # Set password when user is created
+
+    - name: Create the user's home directory
+      file:
+        path: "/home/{{ user_name }}"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: "0755"
+
+    - name: Force password change at next login
+      command: chage -d 0 {{ user_name }}
+      #*when: ansible_os_family == "Linux"  # Ensure this runs only on Linux systems
+
+# ansible-playbook prompt_user_creation.yml -i linux_hosts -k --ask-pass-become
