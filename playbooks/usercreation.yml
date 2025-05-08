@@ -1,0 +1,32 @@
+---
+- hosts: all  # Or specify your target hosts
+  become: yes # For root privileges
+  vars:
+    user_name: "default_user"  # Default username
+    user_password: "default_password"  # Default password (change this for security)
+    user_comment: "Default User"  # Default user description
+    user_groups: []  # Default to no additional groups
+
+  tasks:
+    - name: Create a new user
+      user:
+        name: "{{ user_name }}"  # The username
+        password: "{{ user_password }}"  # The password (encrypted is best practice)
+        comment: "{{ user_comment }}"  # Optional user description
+        create_home: yes  # Create the home directory
+        home: "/home/{{ user_name }}"  # The home directory
+        shell: "/bin/bash"  # Default shell
+        state: present  # Ensure the user exists
+        groups: "{{ user_groups }}"  # Assign secondary groups
+        append: yes  # Append to existing groups
+        # password_behavior: append  # Create password only when user is created
+
+    - name: Create the user's home directory
+      file:
+        path: "/home/{{ user_name }}"
+        state: directory
+        owner: "{{ user_name }}"
+        group: "{{ user_name }}"
+        mode: "0755"
+
+# ansible-playbook -usercreation.yml -e " user_name=newuser user_password=securepassword user_comment='New User' user_groups='groupname'" -i linux_hosts.ini -k --ask-become-pass
