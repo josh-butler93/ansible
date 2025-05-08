@@ -1,0 +1,21 @@
+---
+- hosts: all  # Or specify your target hosts
+  become: yes  # For root privileges
+  vars_prompt:
+    - name: user_name
+      prompt: "Enter the username to delete"
+      private: no  # Set to 'yes' if you want to hide input
+
+  tasks:
+    - name: Delete the user
+      user:
+        name: "{{ user_name }}"
+        state: absent  # Ensure the user is deleted
+
+    - name: Remove the user's home directory
+      file:
+        path: "/home/{{ user_name }}"
+        state: absent  # Ensure the home directory is deleted
+      # when: ansible_os_family == "Linux"  # Ensure this runs only on Linux systems
+
+# ansible-playbook user_deletion.yml -i linux_hosts -k --ask-become-pass
