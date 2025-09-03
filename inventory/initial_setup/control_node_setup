@@ -1,0 +1,37 @@
+====
+RHEL
+====
+==================
+Control Node Setup 
+==================
+1. sudo apt/dnf update -y && sudo apt/dnf upgrade -y
+
+2. Enable EPEL (extra packages repo)
+      a. sudo dnf install -y epel-release
+  
+3. Install Python + pip + Git + SSH
+sudo dnf install -y python3 python3-pip git sshpass
+  
+4. sudo apt/dnf install -y ansible-core
+    a. if unsure run the below command:
+        apt search ansible
+        dnf search ansible
+
+5. Command: ansible --version
+
+======
+Debian
+======
+1. Update system
+    command: sudo apt update && sudo apt upgrade -y
+
+2. Install Python + pip + Ansible dependencies
+    command: sudo apt install -y software-properties-common python3 python3-pip python3-venv sshpass git
+
+3. Add Ansible PPA repo
+    command: sudo add-apt-repository --yes --update ppa:ansible/ansible
+
+4. Install Ansible
+    command: sudo apt install -y ansible
+
+5. ansible --version
