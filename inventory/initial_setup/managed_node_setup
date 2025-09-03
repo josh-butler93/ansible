@@ -1,0 +1,15 @@
+====
+RHEL
+====
+1. sudo dnf update -y && sudo dnf upgrade -y
+2. sudo dnf install -y python3 #python3 python3-apt ssh#--may not be needed
+3. sudo apt install -y openssh-server
+4. sudo systemctl enable --now ssh
+
+======
+Debian
+======
+1. sudo apt update -y && sudo apt upgrade -y
+2. sudo apt install -y python3 #python3 python3-apt ssh#--may not be needed
+3. sudo dnf install -y openssh-server
+4. sudo systemctl enable --now ssh
