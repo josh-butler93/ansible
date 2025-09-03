@@ -5,9 +5,10 @@ RHEL
 2. sudo dnf install -y python3 #python3 python3-apt ssh#--may not be needed
 3. sudo dnf install -y openssh-server
 4. sudo systemctl enable --now ssh
-5. sudo firewall-cmd --permanent --add-service=ssh
-6. sudo firewall-cmd --reload
-7. sudo firewall-cmd status
+5. systemctl status ssh
+6. sudo firewall-cmd --permanent --add-service=ssh
+7. sudo firewall-cmd --reload
+8. sudo firewall-cmd status
 
 ======
 Debian
@@ -16,7 +17,8 @@ Debian
 2. sudo apt install -y python3 #python3 python3-apt ssh#--may not be needed
 3. sudo dnf install -y openssh-server
 4. sudo systemctl enable --now ssh
-5. sudo ufw enable ufw
-6. sudo ufw allow 22/tcp
-7. sudo ufw reload
-8 sudo ufw status
+5. systemctl status ssh
+6. sudo ufw enable ufw
+7. sudo ufw allow 22/tcp
+8. sudo ufw reload
+9. sudo ufw status
