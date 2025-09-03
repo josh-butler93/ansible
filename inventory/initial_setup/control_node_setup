@@ -43,3 +43,22 @@ Debian
 6. sudo dnf install -y openssh-client
 
 7. ssh <username>@<server_node_ip-address>
+
+=========
+Breakdown
+=========
+Why SSH server vs. client?
+      Control Node (Ansible server): needs the SSH client → this is what initiates connections out to other machines.
+      Managed Nodes (the ones you configure): need the SSH server (sshd) → this is what listens for incoming connections and accepts logins.
+
+Think of it like this:
+      Your laptop has an SSH client → you run ssh user@server to connect.
+      The remote server has an SSH server → it listens on port 22 and lets you in
+
+Which way do you SSH?
+      Always from the control node → managed node.
+      The control node uses SSH to connect into each managed node, run commands, and apply your playbooks.
+      Managed nodes never initiate connections back to the control node.
+      So if your control node is 192.168.1.10 and a managed node is 192.168.1.20, you would do this from the control node:
+      ssh user@192.168.1.20
+      *You do not SSH from managed → control.
