@@ -1,0 +1,24 @@
+- name: Install base utilities
+  hosts: all
+  become: yes
+  tasks:
+    
+    - name: Install common packages
+      apt:
+        name: 
+          - vim
+          - curl
+          - git
+          - htop
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install common packages
+      yum:
+        name: 
+          - vim
+          - curl
+          - git
+          - htop
+        state: present
+      when: ansible_os_family == "RedHat"
