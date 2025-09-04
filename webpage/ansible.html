@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ansible Web UI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+    #sidebar {
+      width: 220px;
+      background: #111;
+      color: white;
+      padding: 20px;
+    }
+    #sidebar h2 { margin-top: 0; }
+    #sidebar button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      background: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 4px;
+    }
+    #sidebar button.active { background: #444; }
+    #main { flex: 1; padding: 20px; overflow-y: auto; }
+    #search {
+      width: 50%;
+      padding: 8px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      border: none;
+      background: #2c2c2c;
+      color: #e0e0e0;
+    }
+    #search::placeholder { color: #aaa; }
+    .item { margin-bottom: 10px; }
+    .item button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: #333;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      border-radius: 4px;
+      color: #e0e0e0;
+    }
+    .item pre {
+      background: #2c2c2c;
+      padding: 10px;
+      margin-top: 5px;
+      display: none;
+      overflow-x: auto;
+      border-radius: 4px;
+      color: #d4d4d4;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h2>Ansible</h2>
+  <button class="tab active" data-tab="commands">Commands</button>
+  <button class="tab" data-tab="playbooks">Playbooks</button>
+  <button class="tab" data-tab="setups">Setups</button>
+</div>
+
+<div id="main">
+  <input type="text" id="search" placeholder="Search...">
+  <div id="content"></div>
+</div>
+
+<script>
+const commands = [
+  { name: "Ping", syntax: "ansible all -m ping" },
+  { name: "Update Packages", syntax: "ansible-playbook update.yml" },
+  { name: "Gather Facts", syntax: "ansible all -m setup" },
+  { name: "Check OS Family", syntax: "ansible all -m setup -a 'filter=ansible_os_family'" },
+  { name: "Check Disk Usage", syntax: "ansible all -m command -a 'df -h'" },
+  { name: "Check Memory Usage", syntax: "ansible all -m command -a 'free -m'" },
+  { name: "Check Uptime", syntax: "ansible all -m command -a 'uptime'" },
+  { name: "List Users", syntax: "ansible all -m command -a 'who'" }
+];
+
+const playbooks = [
+  {
+    name: "Daily Update",
+    setup: `---\n- name: Daily package updates\n  hosts: all\n  become: yes\n  tasks:\n    - name: Update apt package cache (Debian/Ubuntu)\n      apt:\n        update_cache: yes\n        upgrade: dist\n      when: ansible_os_family == "Debian"\n\n    - name: Update all packages (RHEL/CentOS/Rocky)\n      dnf:\n        name: "*"\n        state: latest\n        update_cache: yes\n      when: ansible_os_family == "RedHat"`
+  },
+  {
+    name: "System Health Check",
+    setup: `---\n- name: Daily system health check\n  hosts: all\n  become: yes\n  tasks:\n    - name: Check disk usage\n      command: df -h\n      register: disk_usage\n\n    - debug:\n        var: disk_usage.stdout_lines\n\n    - name: Check memory usage\n      command: free -m\n      register: mem_usage\n\n    - debug:\n        var: mem_usage.stdout_lines`
+  },
+  {
+    name: "OS Family Report",
+    setup: `---\n- name: Report OS Family\n  hosts: all\n  gather_facts: yes\n  tasks:\n    - name: Show OS family\n      debug:\n        msg: "Host {{ inventory_hostname }} is running on OS family: {{ ansible_facts['os_family'] }}"`
+  },
+  {
+    name: "User Management Example",
+    setup: `---\n- name: Add a new user\n  hosts: all\n  become: yes\n  tasks:\n    - name: Create user 'newuser'\n      user:\n        name: newuser\n        state: present\n        shell: /bin/bash`
+  }
+];
+
+const setups = [
+  { name: "Builds", info: "Setup instructions and build guides will be added here later." }
+];
+
+let activeTab = 'commands';
+let expandedName = null;
+
+const sidebarButtons = document.querySelectorAll('#sidebar .tab');
+sidebarButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    sidebarButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = btn.dataset.tab;
+    document.getElementById('search').value = '';
+    expandedName = null;
+    renderContent();
+  });
+});
+
+document.getElementById('search').addEventListener('input', renderContent);
+
+function renderContent() {
+  const searchText = document.getElementById('search').value.toLowerCase();
+  const contentDiv = document.getElementById('content');
+  contentDiv.innerHTML = '';
+
+  let items;
+  if (activeTab === 'commands') items = commands;
+  else if (activeTab === 'playbooks') items = playbooks;
+  else items = setups;
+
+  items.filter(item => item.name.toLowerCase().includes(searchText)).forEach(item => {
+    const div = document.createElement('div');
+    div.classList.add('item');
+
+    const button = document.createElement('button');
+    button.textContent = item.name;
+    button.addEventListener('click', () => {
+      expandedName = expandedName === item.name ? null : item.name;
+      renderContent();
+    });
+    div.appendChild(button);
+
+    const pre = document.createElement('pre');
+    if(activeTab === 'commands') pre.textContent = item.syntax;
+    else if(activeTab === 'playbooks') pre.textContent = item.setup;
+    else pre.textContent = item.info;
+
+    pre.style.display = expandedName === item.name ? 'block' : 'none';
+    div.appendChild(pre);
+
+    contentDiv.appendChild(div);
+  });
+}
+
+renderContent();
+</script>
+
+</body>
+</html>
