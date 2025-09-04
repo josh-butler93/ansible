@@ -1,0 +1,25 @@
+---
+- name: Daily system health check
+  hosts: all
+  become: yes
+  tasks:
+    - name: Check disk usage
+      command: df -h
+      register: disk_usage
+
+    - debug:
+        var: disk_usage.stdout_lines
+
+    - name: Check memory usage
+      command: free -m
+      register: mem_usage
+
+    - debug:
+        var: mem_usage.stdout_lines
+
+    - name: Check system load
+      command: uptime
+      register: load_avg
+
+    - debug:
+        var: load_avg.stdout
