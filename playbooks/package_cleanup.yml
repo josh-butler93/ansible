@@ -1,0 +1,23 @@
+---
+- name: Daily cleanup
+  hosts: all
+  become: yes
+  tasks:
+    - name: Autoremove unused packages (Debian/Ubuntu)
+      apt:
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Clean package cache (Debian/Ubuntu)
+      apt:
+        autoclean: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Autoremove unused packages (RHEL/CentOS/Rocky)
+      dnf:
+        autoremove: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Clean package cache (RHEL/CentOS/Rocky)
+      command: dnf clean all
+      when: ansible_os_family == "RedHat"
