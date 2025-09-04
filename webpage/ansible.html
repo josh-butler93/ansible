@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ansible Web UI</title>
+
+  <!-- Prism CSS for syntax highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,15 +60,11 @@
       border-radius: 4px;
       color: #e0e0e0;
     }
-    .item pre {
-      background: #2c2c2c;
-      padding: 10px;
+    pre {
       margin-top: 5px;
       display: none;
-      overflow-x: auto;
       border-radius: 4px;
-      color: #d4d4d4;
-      white-space: pre-wrap;
+      overflow-x: auto;
     }
   </style>
 </head>
@@ -81,6 +81,11 @@
   <input type="text" id="search" placeholder="Search...">
   <div id="content"></div>
 </div>
+
+<!-- Prism JS -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-bash.min.js"></script>
 
 <script>
 const commands = [
@@ -157,15 +162,22 @@ function renderContent() {
     div.appendChild(button);
 
     const pre = document.createElement('pre');
-    if(activeTab === 'commands') pre.textContent = item.syntax;
-    else if(activeTab === 'playbooks') pre.textContent = item.setup;
-    else pre.textContent = item.info;
-
+    if(activeTab === 'commands') {
+      pre.className = "language-bash";
+      pre.textContent = item.syntax;
+    } else if(activeTab === 'playbooks') {
+      pre.className = "language-yaml";
+      pre.textContent = item.setup;
+    } else {
+      pre.textContent = item.info;
+    }
     pre.style.display = expandedName === item.name ? 'block' : 'none';
     div.appendChild(pre);
 
     contentDiv.appendChild(div);
   });
+
+  Prism.highlightAll(); // update syntax highlighting
 }
 
 renderContent();
