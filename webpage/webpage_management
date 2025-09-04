@@ -26,7 +26,84 @@ Add an object to items with name and syntax (or setup / info).
 Save and reload — the UI automatically includes it.
 
 This gives you a fully functional Ansible practice hub in a browser that can grow with your playbooks and commands.
-=================================================================================
+
+##Template for Adding a New Command Category##
+
+ansibleData.commands.push({
+  category: "CATEGORY_NAME",  // e.g., "Monitoring", "Security", "Networking"
+  items: [
+    { name: "Command Name 1", syntax: "actual_command_here" },
+    { name: "Command Name 2", syntax: "actual_command_here" },
+    { name: "Command Name 3", syntax: "actual_command_here" }
+  ]
+});
+
+
+Example:
+
+ansibleData.commands.push({
+  category: "Monitoring",
+  items: [
+    { name: "Check CPU Usage", syntax: "ansible all -m command -a 'top -b -n1 | head -5'" },
+    { name: "Check Running Services", syntax: "ansible all -m service_facts" }
+  ]
+});
+
+2️⃣ Template for Adding a New Playbook Category
+ansibleData.playbooks.push({
+  category: "CATEGORY_NAME", // e.g., "Web Servers", "Users", "Health"
+  items: [
+    {
+      name: "Playbook Name 1",
+      setup: `---\n- name: Description\n  hosts: all\n  become: yes\n  tasks:\n    - name: Task description\n      MODULE:\n        PARAMS`
+    },
+    {
+      name: "Playbook Name 2",
+      setup: `---\n- name: Description\n  hosts: all\n  tasks:\n    - name: Task description\n      MODULE:\n        PARAMS`
+    }
+  ]
+});
+
+
+Example:
+
+ansibleData.playbooks.push({
+  category: "Security",
+  items: [
+    {
+      name: "Disable Root SSH Login",
+      setup: `---\n- name: Secure SSH\n  hosts: all\n  become: yes\n  tasks:\n    - name: Disable root login\n      lineinfile:\n        path: /etc/ssh/sshd_config\n        regexp: '^PermitRootLogin'\n        line: 'PermitRootLogin no'\n      notify: Restart sshd\n\n  handlers:\n    - name: Restart sshd\n      service:\n        name: sshd\n        state: restarted`
+    }
+  ]
+});
+
+3️⃣ Template for Adding a New Setup/Build Category
+ansibleData.setups.push({
+  category: "CATEGORY_NAME",  // e.g., "Builds", "Guides"
+  items: [
+    { name: "Setup Name", info: "Description or instructions for this setup" }
+  ]
+});
+
+
+Example:
+
+ansibleData.setups.push({
+  category: "Guides",
+  items: [
+    { name: "Initial Server Setup", info: "Step-by-step instructions for setting up a new server with Ansible." }
+  ]
+});
+
+✅ How to Use
+
+Copy the template for the type you want (command, playbook, or setup).
+
+Replace CATEGORY_NAME, Command Name, Playbook Name, syntax, or setup with your actual content.
+
+Paste it anywhere in your <script> block, after your original ansibleData declaration.
+
+Reload the page — the new category and items automatically appear=================================================================================
 =================================================================================
 
 
