@@ -1,0 +1,16 @@
+---
+- name: apt update and upgrade
+  hosts: all <configure to group you need updated>
+  gather_facts: true
+  become: true
+  tasks: 
+
+    - name: apt cache update
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: apt upgrade
+      ansible.builtin.apt:
+        upgrade: dist
+
+# command: ansible-playbook distro_update.yml -i hosts.ini --ask-become-pass
