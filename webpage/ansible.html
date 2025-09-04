@@ -93,7 +93,7 @@
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-bash.min.js"></script>
 
 <script>
-// Categorized data structure
+// Categorized data structure with added Networking/Web Servers
 const ansibleData = {
   commands: [
     {
@@ -112,6 +112,14 @@ const ansibleData = {
         { name: "Check Memory Usage", syntax: "ansible all -m command -a 'free -m'" },
         { name: "Check Uptime", syntax: "ansible all -m command -a 'uptime'" },
         { name: "List Users", syntax: "ansible all -m command -a 'who'" }
+      ]
+    },
+    {
+      category: "Networking",
+      items: [
+        { name: "Check Open Ports", syntax: "ansible all -m command -a 'ss -tuln'" },
+        { name: "Ping Gateway", syntax: "ansible all -m command -a 'ping -c 3 192.168.1.1'" },
+        { name: "Traceroute to Host", syntax: "ansible all -m command -a 'traceroute google.com'" }
       ]
     }
   ],
@@ -145,6 +153,19 @@ const ansibleData = {
         {
           name: "Add New User",
           setup: `---\n- name: Add a new user\n  hosts: all\n  become: yes\n  tasks:\n    - name: Create user 'newuser'\n      user:\n        name: newuser\n        state: present\n        shell: /bin/bash`
+        }
+      ]
+    },
+    {
+      category: "Web Servers",
+      items: [
+        {
+          name: "Install Nginx",
+          setup: `---\n- name: Install Nginx web server\n  hosts: all\n  become: yes\n  tasks:\n    - name: Install nginx\n      apt:\n        name: nginx\n        state: present\n      when: ansible_os_family == "Debian"\n\n    - name: Install nginx\n      dnf:\n        name: nginx\n        state: present\n      when: ansible_os_family == "RedHat"`
+        },
+        {
+          name: "Start Nginx Service",
+          setup: `---\n- name: Start Nginx service\n  hosts: all\n  become: yes\n  tasks:\n    - name: Ensure nginx is running\n      service:\n        name: nginx\n        state: started\n        enabled: yes`
         }
       ]
     }
@@ -220,7 +241,6 @@ function renderContent() {
   Prism.highlightAll();
 }
 
-// initial render
 renderContent();
 </script>
 </body>
