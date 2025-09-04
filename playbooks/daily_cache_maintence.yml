@@ -1,0 +1,16 @@
+---
+- name: Daily package updates
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt package cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Update all packages (RHEL/CentOS/Rocky)
+      dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
