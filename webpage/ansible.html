@@ -66,6 +66,11 @@
       border-radius: 4px;
       overflow-x: auto;
     }
+    h3 {
+      border-bottom: 1px solid #444;
+      padding-bottom: 4px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -88,39 +93,72 @@
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.30.0/components/prism-bash.min.js"></script>
 
 <script>
-const commands = [
-  { name: "Ping", syntax: "ansible all -m ping" },
-  { name: "Update Packages", syntax: "ansible-playbook update.yml" },
-  { name: "Gather Facts", syntax: "ansible all -m setup" },
-  { name: "Check OS Family", syntax: "ansible all -m setup -a 'filter=ansible_os_family'" },
-  { name: "Check Disk Usage", syntax: "ansible all -m command -a 'df -h'" },
-  { name: "Check Memory Usage", syntax: "ansible all -m command -a 'free -m'" },
-  { name: "Check Uptime", syntax: "ansible all -m command -a 'uptime'" },
-  { name: "List Users", syntax: "ansible all -m command -a 'who'" }
-];
+// Categorized data structure
+const ansibleData = {
+  commands: [
+    {
+      category: "Basic",
+      items: [
+        { name: "Ping", syntax: "ansible all -m ping" },
+        { name: "Update Packages", syntax: "ansible-playbook update.yml" },
+        { name: "Gather Facts", syntax: "ansible all -m setup" }
+      ]
+    },
+    {
+      category: "System",
+      items: [
+        { name: "Check OS Family", syntax: "ansible all -m setup -a 'filter=ansible_os_family'" },
+        { name: "Check Disk Usage", syntax: "ansible all -m command -a 'df -h'" },
+        { name: "Check Memory Usage", syntax: "ansible all -m command -a 'free -m'" },
+        { name: "Check Uptime", syntax: "ansible all -m command -a 'uptime'" },
+        { name: "List Users", syntax: "ansible all -m command -a 'who'" }
+      ]
+    }
+  ],
 
-const playbooks = [
-  {
-    name: "Daily Update",
-    setup: `---\n- name: Daily package updates\n  hosts: all\n  become: yes\n  tasks:\n    - name: Update apt package cache (Debian/Ubuntu)\n      apt:\n        update_cache: yes\n        upgrade: dist\n      when: ansible_os_family == "Debian"\n\n    - name: Update all packages (RHEL/CentOS/Rocky)\n      dnf:\n        name: "*"\n        state: latest\n        update_cache: yes\n      when: ansible_os_family == "RedHat"`
-  },
-  {
-    name: "System Health Check",
-    setup: `---\n- name: Daily system health check\n  hosts: all\n  become: yes\n  tasks:\n    - name: Check disk usage\n      command: df -h\n      register: disk_usage\n\n    - debug:\n        var: disk_usage.stdout_lines\n\n    - name: Check memory usage\n      command: free -m\n      register: mem_usage\n\n    - debug:\n        var: mem_usage.stdout_lines`
-  },
-  {
-    name: "OS Family Report",
-    setup: `---\n- name: Report OS Family\n  hosts: all\n  gather_facts: yes\n  tasks:\n    - name: Show OS family\n      debug:\n        msg: "Host {{ inventory_hostname }} is running on OS family: {{ ansible_facts['os_family'] }}"`
-  },
-  {
-    name: "User Management Example",
-    setup: `---\n- name: Add a new user\n  hosts: all\n  become: yes\n  tasks:\n    - name: Create user 'newuser'\n      user:\n        name: newuser\n        state: present\n        shell: /bin/bash`
-  }
-];
+  playbooks: [
+    {
+      category: "Updates",
+      items: [
+        {
+          name: "Daily Update",
+          setup: `---\n- name: Daily package updates\n  hosts: all\n  become: yes\n  tasks:\n    - name: Update apt package cache (Debian/Ubuntu)\n      apt:\n        update_cache: yes\n        upgrade: dist\n      when: ansible_os_family == "Debian"\n\n    - name: Update all packages (RHEL/CentOS/Rocky)\n      dnf:\n        name: "*"\n        state: latest\n        update_cache: yes\n      when: ansible_os_family == "RedHat"`
+        }
+      ]
+    },
+    {
+      category: "Health",
+      items: [
+        {
+          name: "System Health Check",
+          setup: `---\n- name: Daily system health check\n  hosts: all\n  become: yes\n  tasks:\n    - name: Check disk usage\n      command: df -h\n      register: disk_usage\n\n    - debug:\n        var: disk_usage.stdout_lines\n\n    - name: Check memory usage\n      command: free -m\n      register: mem_usage\n\n    - debug:\n        var: mem_usage.stdout_lines`
+        },
+        {
+          name: "OS Family Report",
+          setup: `---\n- name: Report OS Family\n  hosts: all\n  gather_facts: yes\n  tasks:\n    - name: Show OS family\n      debug:\n        msg: "Host {{ inventory_hostname }} is running on OS family: {{ ansible_facts['os_family'] }}"`
+        }
+      ]
+    },
+    {
+      category: "User Management",
+      items: [
+        {
+          name: "Add New User",
+          setup: `---\n- name: Add a new user\n  hosts: all\n  become: yes\n  tasks:\n    - name: Create user 'newuser'\n      user:\n        name: newuser\n        state: present\n        shell: /bin/bash`
+        }
+      ]
+    }
+  ],
 
-const setups = [
-  { name: "Builds", info: "Setup instructions and build guides will be added here later." }
-];
+  setups: [
+    {
+      category: "Builds",
+      items: [
+        { name: "Build Instructions", info: "Setup instructions and build guides will be added here later." }
+      ]
+    }
+  ]
+};
 
 let activeTab = 'commands';
 let expandedName = null;
@@ -144,44 +182,46 @@ function renderContent() {
   const contentDiv = document.getElementById('content');
   contentDiv.innerHTML = '';
 
-  let items;
-  if (activeTab === 'commands') items = commands;
-  else if (activeTab === 'playbooks') items = playbooks;
-  else items = setups;
+  const sections = ansibleData[activeTab];
+  sections.forEach(section => {
+    const header = document.createElement('h3');
+    header.textContent = section.category;
+    contentDiv.appendChild(header);
 
-  items.filter(item => item.name.toLowerCase().includes(searchText)).forEach(item => {
-    const div = document.createElement('div');
-    div.classList.add('item');
+    section.items.filter(item => item.name.toLowerCase().includes(searchText)).forEach(item => {
+      const div = document.createElement('div');
+      div.classList.add('item');
 
-    const button = document.createElement('button');
-    button.textContent = item.name;
-    button.addEventListener('click', () => {
-      expandedName = expandedName === item.name ? null : item.name;
-      renderContent();
+      const button = document.createElement('button');
+      button.textContent = item.name;
+      button.addEventListener('click', () => {
+        expandedName = expandedName === item.name ? null : item.name;
+        renderContent();
+      });
+      div.appendChild(button);
+
+      const pre = document.createElement('pre');
+      if(activeTab === 'commands') {
+        pre.className = "language-bash";
+        pre.textContent = item.syntax;
+      } else if(activeTab === 'playbooks') {
+        pre.className = "language-yaml";
+        pre.textContent = item.setup;
+      } else {
+        pre.textContent = item.info;
+      }
+      pre.style.display = expandedName === item.name ? 'block' : 'none';
+      div.appendChild(pre);
+
+      contentDiv.appendChild(div);
     });
-    div.appendChild(button);
-
-    const pre = document.createElement('pre');
-    if(activeTab === 'commands') {
-      pre.className = "language-bash";
-      pre.textContent = item.syntax;
-    } else if(activeTab === 'playbooks') {
-      pre.className = "language-yaml";
-      pre.textContent = item.setup;
-    } else {
-      pre.textContent = item.info;
-    }
-    pre.style.display = expandedName === item.name ? 'block' : 'none';
-    div.appendChild(pre);
-
-    contentDiv.appendChild(div);
   });
 
-  Prism.highlightAll(); // update syntax highlighting
+  Prism.highlightAll();
 }
 
+// initial render
 renderContent();
 </script>
-
 </body>
 </html>
