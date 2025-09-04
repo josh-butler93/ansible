@@ -1,0 +1,85 @@
+Commands
+
+Structure: Keep them in the commands array in your JS. Each command object has:
+
+{
+  name: "Descriptive Name",   // what shows in the list
+  syntax: "full command here" // what shows in the expanded <pre>
+}
+
+
+Tips:
+
+Use short, descriptive names (e.g., “Check CPU Load”, “List Services”).
+
+Keep the syntax exactly as you’d type it in the terminal.
+
+You can group similar commands by prefixing names, e.g., “Disk: df -h”, “Disk: lsblk” to visually separate categories.
+
+Example:
+
+{ name: "Disk: Check Usage", syntax: "ansible all -m command -a 'df -h'" },
+{ name: "Disk: List Devices", syntax: "ansible all -m command -a 'lsblk'" }
+
+2️⃣ Playbooks
+
+Structure: Keep them in the playbooks array. Each object has:
+
+{
+  name: "Descriptive Name",  // shown in the list
+  setup: "YAML content as a string" // what shows in the expanded <pre>
+}
+
+
+Tips:
+
+Use clear descriptive names like “Update Packages” or “User Management Example”.
+
+Keep the YAML indentation correct — any misalignment will make it unreadable in the browser.
+
+When adding multiple tasks, separate them logically with comments or blank lines for readability.
+
+Example:
+
+{
+  name: "Install Web Server",
+  setup: `---\n- name: Install Apache\n  hosts: all\n  become: yes\n  tasks:\n    - name: Install apache2\n      apt:\n        name: apache2\n        state: present\n      when: ansible_os_family == "Debian"`
+}
+
+3️⃣ Setups / Builds
+
+Structure: Keep them simple for now:
+
+{
+  name: "Build Name",
+  info: "Textual instructions or notes for this build."
+}
+
+
+Tips:
+
+Use this for documentation, setup guides, or step-by-step instructions.
+
+Later, you could even include links to scripts, playbooks, or external resources.
+
+4️⃣ Adding New Items
+
+Copy an existing object in the array (commands, playbooks, or setups).
+
+Change name and syntax / setup / info.
+
+Save the file, reload the browser — it automatically renders.
+
+The search/filter will immediately pick up new items.
+
+5️⃣ Optional Best Practices
+
+Consistency: Keep naming consistent across commands/playbooks (e.g., verbs first: “Check CPU”, “Install Nginx”).
+
+Comments: In YAML playbooks, add brief comments to explain tasks.
+
+Categorization: For larger lists, consider adding a category field and later extend the UI to filter by category.
+
+Testing: Test your commands/playbooks separately in a terminal before adding them to the web UI to avoid syntax errors.
+
+If you follow this structure, your boilerplate becomes a scalable, beginner-friendly Ansible reference hub — you can just keep dropping in commands and playbooks as you create or learn them.
