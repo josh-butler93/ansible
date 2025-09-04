@@ -1,3 +1,36 @@
+===============================
+Upgrade Management Instructions
+===============================
+=============================================================================
+=============================================================================
+Features of this updated version:
+
+Scalable, categorized structure – easy to add hundreds of commands/playbooks.
+
+Dark theme.
+
+Syntax highlighting for Bash and YAML using Prism.js.
+
+Search/filter functionality works across all categories.
+
+Expand/collapse works correctly, one item at a time.
+
+Placeholder “Setups/Builds” section for future additions.
+
+Now, when you want to add a new command or playbook, just:
+
+Find the correct category or create a new one.
+
+Add an object to items with name and syntax (or setup / info).
+
+Save and reload — the UI automatically includes it.
+
+This gives you a fully functional Ansible practice hub in a browser that can grow with your playbooks and commands.
+=================================================================================
+=================================================================================
+
+
+
 Commands
 
 Structure: Keep them in the commands array in your JS. Each command object has:
