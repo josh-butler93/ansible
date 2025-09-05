@@ -1,3 +1,6 @@
+# ansible-playbook update.yml --check --this will go through the motions of the playbook but doesnt actually install/update anything
+# ansible-playbook update.yml --check --diff --this shows before and after differences for files/config
+# ansible-playbook update.yml --syntax-check --this will check for any errors in a playbook
 ---
 - name: Daily package updates
   hosts: all
