@@ -1,0 +1,45 @@
+# By default, dry_run: false → normal updates happen.
+# If you set dry_run: true (either inside the playbook or with -e dry_run=true on the command line), the “real” tasks are skipped and you’ll just get debug messages
+# By default, dry_run: false → normal updates happen
+# If you set dry_run: true (either inside the playbook or with -e dry_run=true on the command line), the “real” tasks are skipped and you’ll just get debug messages
+# command: ansible-playbook update.yml -e dry_run=true
+---
+- name: Daily package updates
+  hosts: all
+  become: yes
+  vars:
+    dry_run: false   # 🔹 set to true for dry run, false for normal
+
+  tasks:
+    - name: Update apt package cache (Debian/Ubuntu)
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when:
+        - ansible_os_family == "Debian"
+        - not dry_run
+
+    - name: Update all packages (RHEL/CentOS/Rocky)
+      dnf:
+        name: "*"
+        state: latest
+      when:
+        - ansible_os_family == "RedHat"
+        - not dry_run
+
+    # 🔹 Dry-run info task
+    - name: Simulate update (Debian/Ubuntu)
+      debug:
+        msg: "Would update apt packages (Debian/Ubuntu)"
+      when:
+        - ansible_os_family == "Debian"
+        - dry_run
+
+    - name: Simulate update (RHEL/CentOS/Rocky)
+      debug:
+        msg: "Would update all packages (RHEL/CentOS/Rocky)"
+      when:
+        - ansible_os_family == "RedHat"
+        - dry_run
+
+#
