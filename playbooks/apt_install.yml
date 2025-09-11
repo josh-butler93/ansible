@@ -38,3 +38,76 @@
     # - Error handling with ignore_errors or failed_when if specific failures are acceptable
     # - Idempotency is built-in with apt module, so it won't reinstall if already present
     # - For production, consider adding tags to tasks for selective execution, e.g., tags: ['install']
+
+---
+- name: Install and configure zsh on Debian-based machine
+  hosts: all  # Adjust to your target host group
+  become: true  # Run tasks with sudo privileges
+  vars:
+    app_packages:
+      - zsh
+    update_cache: true
+    cache_valid_time: 3600  # Cache validity in seconds (1 hour)
+    zsh_user: "{{ ansible_user | default('root') }}"  # Default to ansible_user or root; override with --extra-vars "zsh_user=your_username"
+    oh_my_zsh_url: "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+
+  tasks:
+    - name: Update apt cache if needed
+      ansible.builtin.apt:
+        update_cache: "{{ update_cache }}"
+        cache_valid_time: "{{ cache_valid_time }}"
+      when: update_cache | bool
+      tags: ['install']
+
+    - name: Ensure zsh is installed
+      ansible.builtin.apt:
+        name: "{{ app_packages }}"
+        state: present
+      register: zsh_install_result
+      tags: ['install']
+
+    - name: Debug zsh installation result
+      ansible.builtin.debug:
+        msg: "Installed zsh with result: {{ zsh_install_result }}"
+      tags: ['install']
+
+    - name: Check if Oh My Zsh is already installed for user
+      ansible.builtin.stat:
+        path: "/home/{{ zsh_user }}/.oh-my-zsh"
+      register: oh_my_zsh_stat
+      become: false  # Run as the target user
+      tags: ['configure']
+
+    - name: Install Oh My Zsh for user
+      ansible.builtin.shell: |
+        curl -fsSL {{ oh_my_zsh_url }} | sh
+      args:
+        executable: /bin/bash
+        creates: "/home/{{ zsh_user }}/.oh-my-zsh/oh-my-zsh.sh"
+      become: false  # Run as the target user
+      become_user: "{{ zsh_user }}"
+      when: not oh_my_zsh_stat.stat.exists
+      tags: ['configure']
+
+    - name: Set zsh as default shell for user
+      ansible.builtin.user:
+        name: "{{ zsh_user }}"
+        shell: /bin/zsh
+      register: shell_change_result
+      failed_when: shell_change_result.failed and 'chsh' not in shell_change_result.msg  # Ignore if chsh is not available
+      tags: ['configure']
+
+    - name: Debug shell change result
+      ansible.builtin.debug:
+        msg: "Set zsh as default shell for {{ zsh_user }} with result: {{ shell_change_result }}"
+      tags: ['configure']
+
+  handlers:
+    - name: Restart user session
+      ansible.builtin.command:
+        cmd: "su - {{ zsh_user }} -c 'exec zsh'"
+      listen: "restart zsh"
+      become: false
+      become_user: "{{ zsh_user }}"
+      ignore_errors: true  # Session restart may not always be necessary
+      tags: ['configure']
