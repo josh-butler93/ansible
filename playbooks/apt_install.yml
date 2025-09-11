@@ -1,0 +1,40 @@
+---
+- name: Install application on Debian-based machine
+  hosts: all  # Change this to your target host group if needed
+  become: true  # Run tasks with sudo privileges
+  vars:
+    app_packages:  # List of packages to install (can be one or multiple)
+      - "{{ app_name }}"  # Use --extra-vars "app_name=your_package" when running
+    update_cache: true  # Whether to update the apt cache before installing
+    cache_valid_time: 3600  # Cache validity in seconds (1 hour)
+
+  tasks:
+    - name: Update apt cache if needed
+      ansible.builtin.apt:
+        update_cache: "{{ update_cache }}"
+        cache_valid_time: "{{ cache_valid_time }}"
+      when: update_cache | bool
+
+    - name: Ensure required packages are installed
+      ansible.builtin.apt:
+        name: "{{ app_packages }}"
+        state: present  # 'latest' if you want the newest version
+      register: install_result
+
+    - name: Debug installation result
+      ansible.builtin.debug:
+        msg: "Installed packages: {{ app_packages }} with result: {{ install_result }}"
+
+    # Optional: Add a handler for restarting services if the app requires it
+    # handlers:
+    #   - name: Restart app service
+    #     ansible.builtin.service:
+    #       name: your_service_name  # Replace with actual service name, e.g., apache2
+    #       state: restarted
+
+    # To use the handler, add 'notify: Restart app service' to the install task if needed
+
+    # Additional best practices:
+    # - Error handling with ignore_errors or failed_when if specific failures are acceptable
+    # - Idempotency is built-in with apt module, so it won't reinstall if already present
+    # - For production, consider adding tags to tasks for selective execution, e.g., tags: ['install']
