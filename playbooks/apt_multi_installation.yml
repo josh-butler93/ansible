@@ -1,0 +1,28 @@
+---
+- name: Install multiple applications on Debian-based machine
+  hosts: all  # Adjust to your target host group
+  become: true  # Run tasks with sudo privileges
+  vars:
+    app_packages:  # List of packages to install
+      - zsh
+      - curl
+      - vim  # Add or modify packages here
+    update_cache: true
+    cache_valid_time: 3600  # Cache validity in seconds (1 hour)
+
+  tasks:
+    - name: Update apt cache if needed
+      ansible.builtin.apt:
+        update_cache: "{{ update_cache }}"
+        cache_valid_time: "{{ cache_valid_time }}"
+      when: update_cache | bool
+
+    - name: Ensure specified packages are installed
+      ansible.builtin.apt:
+        name: "{{ app_packages }}"
+        state: present
+      register: install_result
+
+    - name: Verify installation of packages
+      ansible.builtin.debug:
+        msg: "Successfully installed packages: {{ app_packages }} with result: {{ install_result }}"
